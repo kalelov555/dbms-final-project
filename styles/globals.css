@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 html,
 body {
   padding: 0;
@@ -14,3 +18,54 @@ a {
 * {
   box-sizing: border-box;
 }
+
+
+
+.ant-list-items {
+  display: flex;
+  flex-direction: row;
+}
+
+.ant-list-item {
+  flex-wrap: wrap-reverse;
+}
+
+.ant-list-item-meta-content {
+  margin-top: 30px;
+}
+
+.ant-list-item-extra{
+  margin-left: 0;
+} 
+.ant-list-item-extra img {
+  width: 80%;
+}
+
+.site-drawer-render-in-current-wrapper {
+  position: relative;
+  height: 250px;
+  width: 100%;
+  overflow: hidden;
+  text-align: center;
+  background: #fafafa;
+  border: 1px solid #ebedf0;
+  border-radius: 2px;
+  padding: 7% 12% 17%;
+  margin: 3% 5%
+}
+
+.footer {
+  display: flex;
+  flex: 1;
+  padding: 2rem 0;
+  border-top: 1px solid #eaeaea;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.container {
+  display: flex;
+  flex-direction: row;
+}
+
