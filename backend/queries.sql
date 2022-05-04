@@ -6,7 +6,7 @@ CREATE TABLE BOOKS(
   genre VARCHAR(100),
   img VARCHAR(300)
 )
-DROP TABLE BOOKS;
+-- DROP TABLE BOOKS;
 
 INSERT INTO BOOKS VALUES(1, 'IT ENDS WITH US', 'by Colleen Hoover', 'A battered wife raised in a violent home attempts to halt the cycle of abuse.' ,'Romance novel, Fiction, Contemporary romance', 'https://storage.googleapis.com/du-prd/books/images/9781501110375.jpg');
 INSERT INTO BOOKS VALUES(2, 'WHERE THE CRAWDADS SING', 'by Delia Owens', 'In a quiet town on the North Carolina coast in 1969, a young woman who survived alone in the marsh becomes a murder suspect.', 'Novel, Mystery, Bildungsroman, Literary fiction', 'https://storage.googleapis.com/du-prd/books/images/9780735219090.jpg');
@@ -59,8 +59,7 @@ INSERT INTO BOOKS VALUES(48, 'GALLANT', 'by V.E. Schwab', 'Olivia uncovers long-
 INSERT INTO BOOKS VALUES(49, 'SHE GETS THE GIRL', 'by Rachael Lippincott and Alyson Derrick', 'Two young women, Alex and Molly, attend the University of Pittsburgh with the intention of reinventing themselves.', 'Young adult fiction','https://storage.googleapis.com/du-prd/books/images/9781534493797.jpg');
 INSERT INTO BOOKS VALUES(50, 'HOTEL MAGNIFIQUE', 'by Emily J. Taylor', 'Two sisters apply and get jobs at the legendary Hotel Magnifique, which changes locations daily, only to find that they are trapped.', 'Fictions','https://storage.googleapis.com/du-prd/books/images/9780593404515.jpg');
 
-select * from books;
-delete from books where id=88;
+SELECT * FROM BOOKS;
 
 CREATE TABLE DMLS(
     c_insert VARCHAR(10),
@@ -76,8 +75,8 @@ CREATE TABLE BOOKS_TRIGGERS_LOG(
   v_user VARCHAR(50)
 )
 
-drop PROCEDURE LOGBOOKS;
 
+-- PROCEDURES AND FUNCTIONS --
 CREATE OR REPLACE PROCEDURE create_table_with_triggs(p_name IN VARCHAR2) IS
 v_create_dml_triggs VARCHAR(15000) := '
     CREATE OR REPLACE TRIGGER dml_' || p_name || '_trigg
@@ -118,10 +117,6 @@ BEGIN
     EXECUTE IMMEDIATE v_create_dml_triggs;
 END;
 
-select * from BOOKS;
-delete from books where id = 51;
-
-
 CREATE OR REPLACE PROCEDURE insert_into_books(
     v_id IN NUMBER,
     v_bookName IN VARCHAR2,
@@ -148,6 +143,7 @@ BEGIN
     RETURN c4;
 END;
 
+
 CREATE OR REPLACE FUNCTION SEARCHBYBOOK(book VARCHAR2) 
 RETURN SYS_REFCURSOR
 IS
@@ -160,20 +156,123 @@ BEGIN
 END;
 
 
-DECLARE
-    curs SYS_REFCURSOR;
+-- PACKAGES --
+CREATE OR REPLACE PACKAGE triggers_pckg
+    IS PROCEDURE create_table_with_triggs(p_name IN VARCHAR2); 
+END triggers_pckg;
+
+CREATE OR REPLACE PACKAGE BODY triggers_pckg IS 
+    PROCEDURE create_table_with_triggs(p_name IN VARCHAR2) IS
+v_create_dml_triggs VARCHAR(15000) := '
+    CREATE OR REPLACE TRIGGER dml_' || p_name || '_trigg
+    AFTER UPDATE OR DELETE OR INSERT ON ' || p_name || '
+    FOR EACH ROW
+    DECLARE
+        v_user VARCHAR(10);
+        v_insert VARCHAR(10);
+        v_delete VARCHAR(10);
+        v_update VARCHAR(10);
+    BEGIN
+        SELECT user INTO v_user
+        FROM dual;
+        
+        SELECT c_insert INTO v_insert
+        FROM dmls;
+        
+        SELECT c_delete INTO v_delete
+        FROM dmls;
+        
+        SELECT c_update INTO v_update
+        FROM dmls;
+        
+        IF DELETING THEN 
+        INSERT INTO ' || p_name || '_triggers_log
+        VALUES(SYSDATE, v_delete, v_user);
+        
+        ELSIF INSERTING THEN
+        INSERT INTO ' || p_name || '_triggers_log
+        VALUES(SYSDATE, v_insert, v_user);
+        
+        ELSIF UPDATING THEN
+        INSERT INTO ' || p_name || '_triggers_log
+        VALUES(SYSDATE, v_update, v_user);
+        END IF;
+    END;';
 BEGIN
-    curs := SEARCHBYBOOK('WONDER');
-    DBMS_SQL.RETURN_RESULT(curs);
+    EXECUTE IMMEDIATE v_create_dml_triggs;
+END;
+END triggers_pckg;
+---
+
+CREATE OR REPLACE PACKAGE insert_one_book_pckg IS
+    PROCEDURE insert_into_books(
+    v_id IN NUMBER,
+    v_bookName IN VARCHAR2,
+    v_author IN VARCHAR2,
+    v_description IN VARCHAR2,
+    v_genre IN VARCHAR2,
+    v_img IN VARCHAR2
+);
+END;
+
+CREATE OR REPLACE PACKAGE BODY insert_one_book_pckg IS
+    PROCEDURE insert_into_books(
+    v_id IN NUMBER,
+    v_bookName IN VARCHAR2,
+    v_author IN VARCHAR2,
+    v_description IN VARCHAR2,
+    v_genre IN VARCHAR2,
+    v_img IN VARCHAR2
+) IS
+BEGIN
+    EXECUTE IMMEDIATE 
+    'INSERT INTO BOOKS VALUES (' ||
+    v_id || ',' || v_bookName || ',' ||  v_author || ',' || v_description || ',' || v_genre || ',' || v_img || ');';
+END;
+END;
+---
+
+CREATE OR REPLACE PACKAGE get_book_pckg IS
+    FUNCTION SEARCHBYGENRE(genre VARCHAR2) 
+        RETURN SYS_REFCURSOR;
+END;
+
+CREATE OR REPLACE PACKAGE BODY get_book_pckg IS 
+    FUNCTION SEARCHBYGENRE(genre VARCHAR2) 
+        RETURN SYS_REFCURSOR
+    IS
+    c4 SYS_REFCURSOR;
+    BEGIN
+        OPEN c4 FOR SELECT * FROM BOOKS
+        WHERE genre LIKE '%' || genre || '%';
+
+        RETURN c4;
+    END;
+END;
+---
+
+CREATE OR REPLACE PACKAGE get_book_bygenre_pckg IS
+    FUNCTION SEARCHBYGENRE(genre VARCHAR2) 
+        RETURN SYS_REFCURSOR;
+END;
+
+CREATE OR REPLACE PACKAGE BODY get_book_bygenre_pckg IS
+    FUNCTION SEARCHBYGENRE(genre VARCHAR2) 
+        RETURN SYS_REFCURSOR
+    IS
+    c4 SYS_REFCURSOR;
+    BEGIN
+        OPEN c4 FOR SELECT * FROM BOOKS
+        WHERE genre LIKE '%' || genre || '%';
+
+        RETURN c4;
+    END;
 END;
 
 
-
-
-
-name: ONE PIECE,
-author: Eichiro Oda,
-genre: Anime,
-id: 51,
-img url: https://simg.marwin.kz/media/catalog/product/cache/41deb699a7fea062a8915debbbb0442c/6/0/6004049080.jpg
-description: The story follows the adventures of Monkey D. Luffy, a boy whose body gained the properties of rubber after unintentionally eating a Devil Fruit.
+-- name: ONE PIECE,
+-- author: Eichiro Oda,
+-- genre: Anime,
+-- id: 51,
+-- img url: https://simg.marwin.kz/media/catalog/product/cache/41deb699a7fea062a8915debbbb0442c/6/0/6004049080.jpg
+-- description: The story follows the adventures of Monkey D. Luffy, a boy whose body gained the properties of rubber after unintentionally eating a Devil Fruit.

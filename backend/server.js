@@ -12,17 +12,15 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cors({ origin: true }));
 
 
-
-
 app.get("/home", (req, res) => {
-  oracledb.getConnection({
-  user: "final",
-  password: "123",
-  connectString: "localhost/orclpdb"
-}, (err, connection) => {
-  if(err) {
-    res.send(err);
-  }
+    oracledb.getConnection({
+      user: "final",
+      password: "123",
+      connectString: "localhost/orclpdb"
+    }, (err, connection) => {
+    if(err) {
+      res.send(err);
+    }
   connection.execute(`
   DECLARE 
     c1 SYS_REFCURSOR;
@@ -30,7 +28,7 @@ app.get("/home", (req, res) => {
     OPEN c1 FOR SELECT * FROM BOOKS
     WHERE BOOKNAME = 'WONDER' OR BOOKNAME = 'HARRY POTTER' OR BOOKNAME = 'WITCHLINGS';
     DBMS_SQL.RETURN_RESULT(c1);
-  create_table_with_triggs('BOOKS');
+    triggers_pckg.create_table_with_triggs('BOOKS');
   END;`, [])
   .then(value => {
     const top = [];
@@ -179,9 +177,8 @@ app.get("/list/genre/:genre", (req, res) => {
       const [id, bookName, author, description, genre, img] = val.implicitResults[0][i];
       books.push(createItem(id, bookName, author, description, genre, img))
     }
-    // res.header("Access-Control-Allow-Origin", "*");
     res.send(books);
-    // connection.close();
+    connection.close();
     })
   })
 })
