@@ -13,7 +13,7 @@ export const CallToAction = () => {
         Morbi tempus mauris a nisi luctus imperdiet.
       </p>
       <div className="main-button inline-block align-middle w-1/3 px-3 py-2 uppercase bg-red-500 hover:bg-red-400 font-medium lg:text-sm text-xs text-white">
-        <a className="hover:text-white " href="#our-classes">Join the course</a>
+        <a className="hover:text-white " href="#our-classes">Get started</a>
       </div>
     </div>
   </section>

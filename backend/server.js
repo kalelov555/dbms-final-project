@@ -29,7 +29,7 @@ app.get("/home", (req, res) => {
   BEGIN 
     OPEN c1 FOR SELECT * FROM BOOKS
     WHERE BOOKNAME = 'WONDER' OR BOOKNAME = 'HARRY POTTER' OR BOOKNAME = 'WITCHLINGS';
-  DBMS_SQL.RETURN_RESULT(c1);
+    DBMS_SQL.RETURN_RESULT(c1);
   create_table_with_triggs('BOOKS');
   END;`, [])
   .then(value => {
@@ -112,11 +112,15 @@ app.get("/list/books/:bookname", (req, res) => {
       res.send(err);
     }
     connection.execute(`
-    SELECT * FROM BOOKS
-    WHERE BOOKNAME = :bn
+    DECLARE
+      curs SYS_REFCURSOR;
+    BEGIN
+      curs := SEARCHBYBOOK(:bookName);
+      DBMS_SQL.RETURN_RESULT(curs);
+    END;
     `, [bookName])
     .then(val => {
-      console.log(val.rows[0]);
+      console.log(val.implicitResults);
       const books = [];
       createItem = (id, bookName, author, description, genre, img) => {
       return {
@@ -129,10 +133,9 @@ app.get("/list/books/:bookname", (req, res) => {
       }
     }
 
-      const [id, bookName, author, description, genre, img] = val.rows[0];
+      const [id, bookName, author, description, genre, img] = val.implicitResults[0][0];
       books.push(createItem(id, bookName, author, description, genre, img))
       
-    //   console.log("server books",books);
       res.header("Access-Control-Allow-Origin", "*");
       res.send(books);
       connection.close();
@@ -152,12 +155,11 @@ app.get("/list/genre/:genre", (req, res) => {
       res.send(err);
     }
     connection.execute(`
-    DECLARE 
-      c4 SYS_REFCURSOR;
-    BEGIN 
-      OPEN c4 FOR SELECT * FROM BOOKS
-      WHERE genre LIKE '%' || :genre || '%';
-      DBMS_SQL.RETURN_RESULT(c4);
+    DECLARE
+      curs SYS_REFCURSOR;
+    BEGIN
+      curs := SEARCHBYGENRE(:genre);
+      DBMS_SQL.RETURN_RESULT(curs);
     END;
     `, [genre])
     .then(val => {

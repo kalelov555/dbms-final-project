@@ -12,6 +12,7 @@ const ByNameCard = ({ books }) => {
   const author = books[0].author;
   const description = books[0].description;
   const img = books[0].img;
+  const genre = books[0].genre;
   
   return <Card
     key={books.id}
@@ -37,6 +38,8 @@ const ByNameCard = ({ books }) => {
     />
     <br></br>
     <br></br>
+    <Text type="danger">{genre}</Text>
+    <br></br><br></br>
     <Rater />
   </Card>
 }

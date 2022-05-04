@@ -47,6 +47,8 @@ const BookGenre = ( {books, genre} ) => {
                   title={<a>{item.bookName}</a>}
                   description={item.description}
                 />
+                <Text type="danger">{item.genre}</Text>
+                <br></br><br></br>
                 <Text keyboard>{item.author}</Text>
                 
               </List.Item>

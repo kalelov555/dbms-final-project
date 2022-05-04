@@ -119,22 +119,61 @@ BEGIN
 END;
 
 select * from BOOKS;
-delete from books where id = 65;
+delete from books where id = 51;
 
 
--- CREATE OR REPLACE PROCEDURE insert_into_books(
---     v_id IN NUMBER,
---     v_bookName IN VARCHAR2,
---     v_author IN VARCHAR2,
---     v_description IN VARCHAR2,
---     v_genre IN VARCHAR2,
---     v_img IN VARCHAR2
--- ) IS
--- BEGIN
---     EXECUTE IMMEDIATE 
---     'INSERT INTO BOOKS VALUES (' ||
---     v_id || ',' || v_bookName || ',' ||  v_author || ',' || v_description || ',' || v_genre || ',' || v_img || ');';
--- END;
+CREATE OR REPLACE PROCEDURE insert_into_books(
+    v_id IN NUMBER,
+    v_bookName IN VARCHAR2,
+    v_author IN VARCHAR2,
+    v_description IN VARCHAR2,
+    v_genre IN VARCHAR2,
+    v_img IN VARCHAR2
+) IS
+BEGIN
+    EXECUTE IMMEDIATE 
+    'INSERT INTO BOOKS VALUES (' ||
+    v_id || ',' || v_bookName || ',' ||  v_author || ',' || v_description || ',' || v_genre || ',' || v_img || ');';
+END;
 
 
-select * from books where genre like '%Novel%';
+CREATE OR REPLACE FUNCTION SEARCHBYGENRE(genre VARCHAR2) 
+RETURN SYS_REFCURSOR
+IS
+c4 SYS_REFCURSOR;
+BEGIN
+    OPEN c4 FOR SELECT * FROM BOOKS
+    WHERE genre LIKE '%' || genre || '%';
+
+    RETURN c4;
+END;
+
+CREATE OR REPLACE FUNCTION SEARCHBYBOOK(book VARCHAR2) 
+RETURN SYS_REFCURSOR
+IS
+c4 SYS_REFCURSOR;
+BEGIN
+    OPEN c4 FOR SELECT * FROM BOOKS
+    WHERE BOOKNAME=book;
+
+    RETURN c4;
+END;
+
+
+DECLARE
+    curs SYS_REFCURSOR;
+BEGIN
+    curs := SEARCHBYBOOK('WONDER');
+    DBMS_SQL.RETURN_RESULT(curs);
+END;
+
+
+
+
+
+name: ONE PIECE,
+author: Eichiro Oda,
+genre: Anime,
+id: 51,
+img url: https://simg.marwin.kz/media/catalog/product/cache/41deb699a7fea062a8915debbbb0442c/6/0/6004049080.jpg
+description: The story follows the adventures of Monkey D. Luffy, a boy whose body gained the properties of rubber after unintentionally eating a Devil Fruit.

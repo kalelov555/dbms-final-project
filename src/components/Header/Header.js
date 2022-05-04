@@ -5,6 +5,7 @@ import {
   AppstoreOutlined,
   FolderAddOutlined,
   LinkOutlined,
+  HomeOutlined,
 } from '@ant-design/icons';
 import { useState } from 'react';
 import Link from 'next/link';
@@ -36,8 +37,11 @@ const Header = () => {
         mode={mode}
         theme={theme}
       >
+      <Menu.Item key="landing" icon={<HomeOutlined />}>
+          <Link href={"/"}>Main page</Link>
+        </Menu.Item>
         <Menu.Item key="main" icon={<MailOutlined />}>
-          <Link href={"/home"}>Main page</Link>
+          <Link href={"/home"}>Home page</Link>
         </Menu.Item>
         <Menu.Item key="list" icon={<CalendarOutlined />}>
           <Link href={"/list"}>List</Link>
